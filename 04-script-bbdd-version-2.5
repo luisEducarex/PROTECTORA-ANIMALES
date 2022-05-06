@@ -1,0 +1,679 @@
+drop database if exists ProtectoraAnimales;
+
+--
+-- Base de datos: 'ProtectoraAnimales'
+--
+
+create database ProtectoraAnimales character set utf8 COLLATE utf8_spanish_ci;
+
+USE ProtectoraAnimales;
+
+--
+-- Estructura de tabla para la tabla 'Refugio'
+--
+
+CREATE TABLE Refugio(
+idRefugio integer(1) not null auto_increment,
+nombreRefugio varchar(30) not null,
+direccionRefugio varchar(50) not null,
+terreno varchar(10) not null,
+numeroRecintos integer(3) not null, 
+primary key (idRefugio)
+)type=innodb;
+
+--
+-- Inserción de datos para la tabla 'Refugio'
+--
+
+INSERT INTO Refugio
+(nombreRefugio, direccionRefugio, terreno, numeroRecintos)
+VALUES
+("Protectora","C/ San Isidro n. 14","700m^3",74);
+
+--
+-- Estructura de tabla para la tabla 'Recintos'
+--
+
+CREATE TABLE Recintos(
+idRecinto integer(3) not null auto_increment,
+medidas varchar(10) not null,
+idRefugio integer(1),
+primary key (idRecinto),
+foreign key (idRefugio) references Refugio(idRefugio)on update cascade on delete cascade
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'Persona'
+--
+
+CREATE TABLE Persona(
+nif varchar(9) not null,
+nombreCompleto varchar(20) not null,
+fechaNacimiento date not null,
+telefono varchar(9),
+domicilio varchar(50),
+tipoPersona enum('Trabajador','PersonaAdoptiva'),
+primary key (nif)
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'Especializaciones'
+--
+
+CREATE TABLE Especializaciones (
+idEspecialidad integer(1) auto_increment,
+nombreEspecialidad varchar(50),
+salario float(6,2),
+primary key (idEspecialidad)
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'Trabajadores'
+--
+
+CREATE TABLE Trabajadores(
+idTrabajador integer(2) auto_increment,
+nif varchar(9),
+idEspecialidad integer(1),
+idRefugio int(1),
+primary key (idTrabajador, nif),
+foreign key (nif) references Persona(nif) on delete cascade on update cascade,
+foreign key (idRefugio) references Refugio(idRefugio) on update cascade on delete cascade,
+foreign key (idEspecialidad) references Especializaciones(idEspecialidad) on update cascade on delete cascade
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'PersonaAdoptiva'
+--
+
+CREATE TABLE PersonaAdoptiva(
+nif varchar(9) primary key,
+terceros bit not null,
+personasDomicilio integer(1),
+niños bit,
+foreign key (nif) references Persona(nif) on update cascade on delete cascade
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'Raza'
+--
+
+CREATE TABLE Raza(
+idRaza integer(1) not null auto_increment,
+nombreRaza varchar(20) not null,
+primary key (idRaza)
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'Alimentos'
+--
+
+CREATE TABLE Alimentos(
+idAlimento integer(2) auto_increment,
+marca varchar(30),
+stock integer(3),
+idRefugio integer(1),
+nombreAlimento varchar(50),
+caducidad date not null,
+primary key (idAlimento),
+foreign key (idRefugio) references Refugio(idRefugio)
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'Vacunas'
+--
+
+CREATE TABLE Vacunas(
+idVacuna integer(3) primary key auto_increment,
+nombreVacuna varchar(30) not null
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'Animales'
+--
+
+CREATE TABLE Animales(
+idAnimal integer(3) not null auto_increment,
+animal varchar(5) not null,
+nombre varchar(15),
+peso double(4,2),
+sexo varchar(10) CHECK (sexo IN ('Macho','Hembra')),
+fechaNacimiento date,
+chip bit,
+idAlimento integer(2),
+origen varchar(15),
+descripcion varchar(50),
+fechaAdopcion date,
+esterilizado bit,
+idRaza integer(1),
+nif varchar(9),
+idRecinto integer(3),
+primary key (idAnimal),
+foreign key (idRaza) references Raza(idRaza) on update cascade on delete cascade,
+foreign key (nif) references PersonaAdoptiva(nif) on update cascade on delete cascade,
+foreign key (idAlimento) references Alimentos(idAlimento) on update cascade on delete cascade,
+foreign key (idRecinto) references Recintos(idRecinto) on update cascade on delete cascade
+)type=innodb;
+
+--
+-- Estructura de tabla para la tabla 'tienenPuesta'
+--
+
+CREATE TABLE tienenPuesta(
+idAnimal integer(3),
+idVacuna integer(3),
+fechaVacuna date,
+foreign key (idAnimal) references Animales(idAnimal) on update cascade on delete cascade,
+foreign key (idVacuna) references Vacunas(idVacuna) on update cascade on delete cascade
+)type=innodb;
+
+--
+-- Inserción de datos para la tabla 'Persona'
+--
+
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09224549B","Ramón Ramírez Ramazzotti","1983-03-05","617189438","C. Comarca Tierra de Barros Nº 2","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09248629C","Antonia García Lara","1976-09-02","623185489","C. Félix Grande Nº 8","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09231283F","Alejandro Reina Custodio","2002-07-16","665939598","Av. Lusitania Nº 6","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09277660V","Solomeo Paredes Segura","1998-02-24","617569849","C. Almendralejo Nº 12","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09283480A","Javier Hernández Pereira","1989-02-13","634122109","C. Oviedo Nº 17","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09222686T","Armando-Estéban Quito Blanco","1994-07-22","627431290","C. Barcelona Nº 7","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09248778S","Esther Lopez Rodriguez","1977-07-07","609559835","C. Pio Baroja Nº 3","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09243487C","Alexis Cortés Quirós","2001-03-25","645524263","C. Jacinto Benavente Nº 8","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09217798D","Iván Ordoñez Alvarez","2003-02-23","644238985","C. Ronda de los Eméritos Nº 15","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09255340L","Laura Álvarez Martín","1999-03-31","655772301","C. La Corchera Nº 19","Trabajador");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09245783G","Juan Antonio Jimenez Frontela","2003-03-24","608873245","C. Colón Nº 14","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09271209H","Felipe López Carvajal","1983-08-07","609144531","C. Santa Eulalia Nº 35","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09248961J","María Dolores Delano Gomez","1948-11-25","924950396","C Bilbao Nº 2","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09299156F","Raúl González Guevara","1996-11-08","618623879","Calle del Museo Nº 7","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09213418S","Francisco Ortega Gutiérrez","1991-05-30","679266132","C. Leonor de Austria Nº 2","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09211836K","Pablo Emilio Escobar Gaviria","1998-12-02","67541005","C. Marquesa de Pinares Nº 23","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09244377P","Alberto Manrique Pérez","2000-09-01","626843328","C. Barbaños Nº 4","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09233660Y","David Muñoz Calvo","1981-05-04","612998654","C. Suarez Somonte Nº 11","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09287123O","Samuel Fernández Márquez","1999-12-08","631504621","C. Mariana Pineda Nº 12","PersonaAdoptiva");
+INSERT INTO Persona
+(nif, nombreCompleto, fechaNacimiento, telefono, domicilio, tipoPersona)
+VALUES
+("09245789C","Rosaura Perez Jiménez","1985-06-23","668509741","C. San Fausto Nº 1","PersonaAdoptiva");
+
+--
+-- Inserción de datos para la tabla 'Especializaciones'
+--
+
+INSERT INTO Especializaciones
+(nombreEspecialidad, salario)
+VALUES
+("Conserje",1000.00);
+INSERT INTO Especializaciones
+(nombreEspecialidad, salario)
+VALUES
+("Veterinario",1500.00);
+INSERT INTO Especializaciones
+(nombreEspecialidad, salario)
+VALUES
+("Cuidador",1200.00);
+
+--
+-- Inserción de datos para la tabla 'Trabajadores'
+--
+
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09224549B",1,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09248629C",2,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09231283F",2,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09277660V",3,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09283480A",3,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09222686T",3,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09248778S",3,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09243487C",3,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09217798D",3,1);
+INSERT INTO Trabajadores
+(nif, idEspecialidad, idRefugio)
+VALUES
+("09255340L",3,1);
+
+
+--
+-- Inserción de datos para la tabla 'PersonaAdoptiva'
+--
+
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09245783G",1,3,0);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09271209H",0,2,1);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09233660Y",0,4,1);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09248961J",1,3,1);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09299156F",0,1,0);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09213418S",1,1,1);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09211836K",1,2,1);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09244377P",0,4,1);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09287123O",0,2,1);
+INSERT INTO PersonaAdoptiva
+(nif, terceros, personasDomicilio, niños)
+VALUES
+("09245789C",1,4,1);
+
+--
+-- Inserción de datos para la tabla 'Recintos'
+--
+
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("3m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("3m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("1,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("3m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("1,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("3m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("1,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("3m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("1,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("3m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("2,5m^3", 1);
+INSERT INTO Recintos
+(medidas, idRefugio)
+VALUES
+("3m^3", 1);
+
+--
+-- Inserción de datos para la tabla 'Raza'
+--
+
+INSERT INTO Raza
+(nombreRaza)
+VALUES
+("Bulldog");
+INSERT INTO Raza
+(nombreRaza)
+VALUES
+("Pastor Alemán");
+INSERT INTO Raza
+(nombreRaza)
+VALUES
+("Dóberman");
+INSERT INTO Raza
+(nombreRaza)
+VALUES
+("Gato Persa");
+INSERT INTO Raza
+(nombreRaza)
+VALUES
+("Siamés");
+INSERT INTO Raza
+(nombreRaza)
+VALUES
+("Gato Siberiano");
+
+--
+-- Inserción de datos para la tabla 'Alimentos'
+--
+
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Acana",78,1,"Acana Classics","2023-02-24");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Acana",45,1,"Wild Prairie","2022-08-12");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Taste of the Wild",23,1,"Taste of the Wild con carne de venado","2023-03-4");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Alpha Spirit",65,1,"Alimento semi-húmedo wild fish","2023-01-22");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("True Instinct",73,1,"SuperFood Snack Pollo","2022-07-30");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Orijen Cat",23,1,"Cat and Kitten","2022-10-11");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Orijen",56,1,"Orijen puppy","2022-12-5");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Royal Canin",38,1,"Intense Beauty Jelly","2023-03-13");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Ultima",73,1,"Esterilizado Adulto con Pollo","2022-12-04");
+INSERT INTO Alimentos
+(marca, stock, idRefugio, nombreAlimento, caducidad)
+VALUES
+("Advance",49,1,"Advance Kitten con Pollo","2023–01-25");
+
+--
+-- Inserción de datos para la tabla 'Vacunas'
+--
+
+INSERT INTO Vacunas
+(nombreVacuna)
+VALUES
+("Vacuna del moquillo");
+INSERT INTO Vacunas
+(nombreVacuna)
+VALUES
+("Vacuna de la hepatitis");
+INSERT INTO Vacunas
+(nombreVacuna)
+VALUES
+("Vacuna de la tos de las perras");
+INSERT INTO Vacunas
+(nombreVacuna)
+VALUES
+("Vacuna de la rabia");
+INSERT INTO Vacunas
+(nombreVacuna)
+VALUES
+("Vacuna de la gripe felina");
+INSERT INTO Vacunas
+(nombreVacuna)
+VALUES
+("Vacuna de la leucosis");
+
+--
+-- Inserción de datos para la tabla 'Animales'
+--
+
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Perro", "Tyron", "20 Kg", "Macho", "2019-10-24", 0, 3, "Rescatado", "Blanco, le falta una oreja", "2022-02-13", 0, 2, "09245783G", 1);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Perro", "Firulais", "14 Kg", "Macho", "2017-12-02", 1, 2, "Acogido", "Marrón", "2021-07-24", 1, 3, "09271209H", 2);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Perro", "Thor", "11 Kg", "Macho", "2018-06-17", 1, 4, "Acogido", "Negro, cojo de una pata", 1, 1, 3);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Perro","Zeus","17 Kg","Macho","2020-04-06", 0, 2,"Rescatado","Blanco", 0, 1, 4);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Perro","Bobby","10 Kg","Macho","2017-09-30", 1, 3,"Acogido","Marrón", 1, 2, 5);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Perro","Perla","11 Kg","Hembra","2016-04-12", 1, 4,"Abandonado","Blanco, tiene la cola cortada","2020-12-03", 1, 1,"09233660Y", 6);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Perro","Nala","15 Kg","Hembra","2019-02-24", 1, 3, "Acogido","Negro","2022-03-12", 1, 2,"09248961J", 7);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Perro","Bimba","12 Kg","Hembra","2016-09-16", 0, 4,"Rescatado","Está coja de la pata delantera izquierda","2021-06-23", 0, 1,"09245789C", 8);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Perro","Noa","14 Kg","Hembra","2015-07-05", 1, 1,"Rescatado","Está ciega del ojo derecho", 0, 2, 9);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Perro","Duna","16 Kg","Hembra","2014-07-30", 0, 3,"Acogido","Blanco con manchas negras", 0, 3, 10);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Gato","Odín","8 Kg","Macho","2014-06-12", 1, 5,"Rescatado","Gris","2019-04-30", 1, 5,"09299156F", 11);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Gato","Leo","10 Kg","Macho","2019-09-01", 0, 6,"Rescatado","Le falta la pata trasera derecha","2022-01-25", 0, 5,"09213418S", 12);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Gato","Jerry","7 Kg","Macho","2016-12-04", 1, 6,"Acogido","Negro", 0, 5, 13);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Gato","Dante","9 Kg","Macho","2017-04-15", 1, 6,"Acogido","Sordo", 0, 6, 14);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Gato","Milo","11 Kg","Macho","2020-04-24", 0, 5,"Rescatado","Blanco", 0, 4, 15);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Gato","Kira","7 Kg","Hembra","2021-02-04", 0, 6,"Acogido","Blanco","2022-04-12", 1, 4,"09211836K", 16);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Gato","Nube","12 Kg","Hembra","2019-06-05", 0, 8,"Rescatado","Sordo","2021-08-24", 0, 5,"09244377P", 17);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, fechaAdopcion, esterilizado, idRaza, nif, idRecinto)
+VALUES
+("Gato","Kiara","8 Kg","Hembra","2018-10-11", 1, 9,"Acogido","Marrón","2022-03-14", 1, 6,"09287123O", 18);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Gato","Ámbar","10 Kg","Hembra","2017-02-28", 1, 7,"Rescatado","Negro", 0, 4, 19);
+INSERT INTO Animales
+(animal, nombre, peso, sexo, fechaNacimiento, chip, idAlimento, origen, descripcion, esterilizado, idRaza, idRecinto)
+VALUES
+("Gato","Sora","8 Kg","Hembra","2019-05-17", 1, 10,"Acogido","Esta cojo de la pata delantera derecha", 1, 6, 20);
+
+--
+-- Inserción de datos para la tabla 'tienenPuesta'
+--
+
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(1, 2, "2018-04-24");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(2, 1, "2016-06-15");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(3, 3, "2020-12-13");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(4, 5, "2022-08-03");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(5, 6, "2021-09-17");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(6, 1, "2019-03-28");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(7, 2, "2017-01-27");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(8, 2, "2015-06-29");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(9, 1, "2022-10-30");
+INSERT INTO tienenPuesta
+(idAnimal, idVacuna, fechaVacuna)
+VALUES
+(10, 4, "2020-11-14");
